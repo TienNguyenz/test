@@ -1,0 +1,38 @@
+@page
+@{
+    ViewData["Title"] = "Data Contracts";
+}
+
+<div class="page-head mb-4">
+    <h2>Data Contract and Constraint Mapping</h2>
+    <p>Field constraints and type normalization applied between SQL Server and MySQL.</p>
+</div>
+
+<div class="glass-card p-4 mb-3">
+    <h4>SQL Server (HQ) - SanPham</h4>
+    <ul class="mb-0">
+        <li>ProductID: INT IDENTITY PRIMARY KEY</li>
+        <li>ProductName: NVARCHAR(200) NOT NULL</li>
+        <li>Price: DECIMAL(18,2) CHECK (Price &gt;= 0)</li>
+        <li>Category: NVARCHAR(100) NOT NULL</li>
+    </ul>
+</div>
+
+<div class="glass-card p-4 mb-3">
+    <h4>MySQL (Branch) - SanPham/HoaDon</h4>
+    <ul class="mb-0">
+        <li>SanPham.Price: DECIMAL(18,2) NOT NULL</li>
+        <li>HoaDon.SaleDate: DATETIME (cast to DATETIME2 in SQL Server queries)</li>
+        <li>HoaDon.Total: DECIMAL(18,2) (cast and aggregated in HQ report)</li>
+        <li>HoaDon.Quantity: INT CHECK (Quantity &gt; 0)</li>
+    </ul>
+</div>
+
+<div class="glass-card p-4">
+    <h4>Normalization Rules in Query Layer</h4>
+    <ul class="mb-0">
+        <li>CAST(SaleDate AS DATETIME2(0)) to align SQL Server and MySQL datetime behavior.</li>
+        <li>CAST(Total AS DECIMAL(18,2)) to prevent precision mismatch.</li>
+        <li>CAST(ProductID, Quantity AS INT) before joins and aggregations.</li>
+    </ul>
+</div>

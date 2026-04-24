@@ -1,0 +1,94 @@
+<h1 id="bao-cao-do-an---techstore">BAO CAO DO AN - TECHSTORE</h1>
+<h2 id="gioi-thieu">1. Gioi thieu</h2>
+<p>De tai: TechStore - Quan ly Chuoi Ban le Da nen tang.</p>
+<p>Boi canh nghiep vu: - Tru so chinh su dung SQL Server. - Chi nhanh su dung MySQL. - Sau sap nhap, khong muon migrate full du lieu vi ton kem va gian doan.</p>
+<p>Muc tieu: - Tich hop he thong SQL Server va MySQL. - Truy van tong hop du lieu khac he quan tri. - Dong bo gia san pham tu HQ sang Branch. - Trinh bay demo bang web Razor Pages.</p>
+<h2 id="kien-truc-giai-phap">2. Kien truc giai phap</h2>
+<h3 id="thanh-phan">2.1 Thanh phan</h3>
+<ul>
+<li>SQL Server (HQ): <code>TechStore_HQ</code>, bang <code>SanPham</code>, queue dong bo.</li>
+<li>MySQL (Branch): <code>TechStore_Branch</code>, bang <code>HoaDon</code>, bang <code>SanPham</code>.</li>
+<li>Linked Server <code>MYSQL</code>: SQL Server ket noi MySQL qua ODBC (MSDASQL).</li>
+<li>Web app: ASP.NET Core Razor Pages.</li>
+</ul>
+<h3 id="luong-du-lieu">2.2 Luong du lieu</h3>
+<ol style="list-style-type: decimal">
+<li>Web cap nhat gia tai HQ (<code>SanPham</code>).</li>
+<li>Trigger ghi su kien vao <code>PriceSyncQueue</code>.</li>
+<li>Procedure <code>sp_ProcessPriceSyncQueue</code> day gia sang MySQL.</li>
+<li>Bao cao doanh thu goi <code>sp_BaoCaoDoanhThu</code> de tong hop HQ + Branch.</li>
+</ol>
+<h2 id="cai-dat-va-cau-hinh">3. Cai dat va cau hinh</h2>
+<h3 id="sql-server">3.1 SQL Server</h3>
+<ul>
+<li>Tao CSDL <code>TechStore_HQ</code>.</li>
+<li>Bang chinh: <code>dbo.SanPham</code>, <code>dbo.PriceSyncQueue</code>.</li>
+<li>Procedure:</li>
+<li><code>dbo.sp_BaoCaoDoanhThu</code></li>
+<li><code>dbo.sp_ProcessPriceSyncQueue</code></li>
+<li>Trigger:</li>
+<li><code>dbo.trg_SanPham_QueuePriceSync</code></li>
+</ul>
+<h3 id="mysql">3.2 MySQL</h3>
+<ul>
+<li>Tao CSDL <code>TechStore_Branch</code>.</li>
+<li>Bang chinh:</li>
+<li><code>SanPham</code></li>
+<li><code>HoaDon</code></li>
+<li>Phan quyen user linked server (<code>tien@localhost</code>) cho SELECT/UPDATE can thiet.</li>
+</ul>
+<h3 id="linked-server">3.3 Linked Server</h3>
+<ul>
+<li>DSN ODBC: MySQL ODBC 8.x</li>
+<li>SQL Server linked server: <code>MYSQL</code></li>
+<li>Kiem tra ket noi:</li>
+<li><code>EXEC sp_testlinkedserver 'MYSQL'</code></li>
+<li><code>SELECT * FROM OPENQUERY(MYSQL, 'SELECT 1 AS ok')</code></li>
+</ul>
+<h2 id="truy-van-tong-hop-va-dong-bo">4. Truy van tong hop va dong bo</h2>
+<h3 id="truy-van-tong-hop">4.1 Truy van tong hop</h3>
+<ul>
+<li>HQ doc hoa don Branch thong qua OPENQUERY.</li>
+<li>Bao cao doanh thu thong qua <code>sp_BaoCaoDoanhThu</code>.</li>
+</ul>
+<h3 id="dong-bo-gia">4.2 Dong bo gia</h3>
+<ul>
+<li>Trigger khong cap nhat MySQL truc tiep (tranh distributed transaction Msg 7391).</li>
+<li>Trigger ghi queue, procedure xu ly queue de day update sang MySQL.</li>
+<li>Co the dat SQL Server Agent Job chay 1 phut/lan de gan realtime.</li>
+</ul>
+<h2 id="xu-ly-sai-khac-du-lieu">5. Xu ly sai khac du lieu</h2>
+<ul>
+<li>DateTime: CAST tu MySQL datetime sang SQL Server datetime2.</li>
+<li>So tien: dung decimal(18,2) dong nhat 2 he.</li>
+<li>OPENQUERY tra ve kieu can CAST ro rang trong query SQL Server.</li>
+</ul>
+<h2 id="web-demo">6. Web demo</h2>
+<p>Project: <a href="../TechStoreWeb">TechStoreWeb</a></p>
+<p>Trang chinh: - Dashboard: tong quan he thong. - Products: danh sach san pham HQ. - Update Price: cap nhat gia + xu ly sync queue. - Invoices: xem hoa don Branch. - Revenue: bao cao tong hop theo ngay.</p>
+<p>Connection string duoc cau hinh tai: - <a href="../TechStoreWeb/appsettings.json">TechStoreWeb/appsettings.json</a></p>
+<h2 id="test-case">7. Test case</h2>
+<p>Tai lieu test case: - <a href="TestCases.md">docs/TestCases.md</a> - Script chay test: - <a href="../scripts/test_cases.sql">scripts/test_cases.sql</a></p>
+<p>Ket qua mong doi: - TC01..TC08 deu PASS sau khi cau hinh dung quyen MySQL va linked server.</p>
+<h2 id="script-demo">8. Script demo</h2>
+<ul>
+<li><a href="../scripts/demo_script.sql">scripts/demo_script.sql</a></li>
+<li>Huong dan demo:</li>
+<li><a href="DemoGuide.md">docs/DemoGuide.md</a></li>
+</ul>
+<h2 id="ket-luan">9. Ket luan</h2>
+<p>He thong da dat cac yeu cau chinh cua de tai: 1. Ket noi da he quan tri SQL Server + MySQL. 2. Truy van tong hop trong suot qua OPENQUERY/stored procedure. 3. Dong bo gia HQ -&gt; Branch thanh cong qua queue processor. 4. Xu ly sai khac kieu du lieu DateTime/Decimal. 5. Co bo test case va web demo truc quan de bao ve do an.</p>
+<h2 id="phu-luc">10. Phu luc</h2>
+<h3 id="lenh-chay-web">10.1 Lenh chay web</h3>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">dotnet</span> run --project TechStoreWeb</code></pre></div>
+<h3 id="url-mac-dinh">10.2 URL mac dinh</h3>
+<ul>
+<li><code>https://localhost:xxxx</code></li>
+<li><code>http://localhost:xxxx</code></li>
+</ul>
+<h3 id="luu-y-khi-demo">10.3 Luu y khi demo</h3>
+<ul>
+<li>Dam bao MySQL service dang chay.</li>
+<li>Dam bao linked server <code>MYSQL</code> test pass truoc khi demo.</li>
+<li>Neu queue co <code>Status = E</code>, kiem tra <code>LastError</code> va quyen MySQL.</li>
+</ul>

@@ -1,0 +1,109 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "TechStore Control Center";
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<section class="hero-panel mb-4">
+    <div>
+        <p class="hero-eyebrow mb-2">Distributed Retail Platform</p>
+        <h1 class="hero-title mb-2">TechStore Control Center</h1>
+        <p class="hero-subtitle mb-0">
+            SQL Server (HQ) and MySQL (Branch) are integrated through Linked Server and OPENQUERY without full migration.
+        </p>
+    </div>
+    <div class="hero-badges">
+        <span class="env-badge">HQ: SQL Server</span>
+        <span class="env-badge">Branch: MySQL</span>
+        <span class="env-badge @(Model.Snapshot.LinkedServerHealthy ? "ok" : "bad")">
+            Link: @(Model.Snapshot.LinkedServerHealthy ? "Healthy" : "Failed")
+        </span>
+    </div>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-label">HQ Products</div>
+            <div class="metric-value">@Model.Snapshot.HqProductCount</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-label">Branch Products</div>
+            <div class="metric-value">@Model.Snapshot.BranchProductCount</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-label">Branch Invoices</div>
+            <div class="metric-value">@Model.Snapshot.BranchInvoiceCount</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="metric-card">
+            <div class="metric-label">Queue (P/S/E)</div>
+            <div class="metric-value">@Model.Snapshot.QueuePendingCount / @Model.Snapshot.QueueSuccessCount / @Model.Snapshot.QueueErrorCount</div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Product CRUD</h5>
+            <p class="text-muted mb-3">Add, edit, delete products with field constraints and branch mirror handling.</p>
+            <a class="btn btn-brand" asp-page="/Products/Index">Open Products</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Distributed Evidence</h5>
+            <p class="text-muted mb-3">Show transparent JOIN output, linked status, and queue telemetry.</p>
+            <a class="btn btn-brand" asp-page="/Distributed/Evidence">Open Evidence</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Revenue Report</h5>
+            <p class="text-muted mb-3">Run integrated revenue reporting with DateTime normalization and filters.</p>
+            <a class="btn btn-brand" asp-page="/Reports/Revenue">Open Revenue</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Price Sync Demo</h5>
+            <p class="text-muted mb-3">Update HQ price, process queue, and verify branch update live.</p>
+            <a class="btn btn-brand" asp-page="/Products/UpdatePrice">Open Sync Demo</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Branch Invoices</h5>
+            <p class="text-muted mb-3">Read MySQL invoices directly from HQ through OPENQUERY.</p>
+            <a class="btn btn-brand" asp-page="/Invoices/Index">Open Invoices</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card h-100 p-4 card-lift">
+            <h5 class="mb-2">Data Contracts</h5>
+            <p class="text-muted mb-3">Field constraints and type compatibility mapping between two DBMSs.</p>
+            <a class="btn btn-brand" asp-page="/Distributed/DataContracts">Open Contracts</a>
+        </div>
+    </div>
+</div>

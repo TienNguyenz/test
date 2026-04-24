@@ -1,0 +1,65 @@
+@page "{id:int}"
+@model TechStoreWeb.Pages.Products.EditModel
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="page-head mb-4">
+    <h2>Edit Product</h2>
+    <p>Update HQ fields and keep Branch metadata consistent.</p>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.Result is not null)
+{
+    <div class="alert @(Model.Result.Success ? "alert-success" : "alert-warning")">
+        @Model.Result.Message
+        @if (!string.IsNullOrWhiteSpace(Model.Result.BranchSyncError))
+        {
+            <div class="small mt-1">Branch detail: @Model.Result.BranchSyncError</div>
+        }
+    </div>
+}
+
+@if (Model.CurrentProduct is not null)
+{
+    <div class="glass-card p-4">
+        <div class="mb-3 small text-muted">ProductID: @Model.CurrentProduct.ProductID</div>
+
+        <form method="post" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="col-md-8">
+                <label asp-for="Input.ProductName" class="form-label"></label>
+                <input asp-for="Input.ProductName" class="form-control" />
+                <span asp-validation-for="Input.ProductName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Input.Price" class="form-label"></label>
+                <input asp-for="Input.Price" type="number" min="1000" step="1000" class="form-control" />
+                <span asp-validation-for="Input.Price" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.Category" class="form-label"></label>
+                <input asp-for="Input.Category" class="form-control" />
+                <span asp-validation-for="Input.Category" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-brand">Save Changes</button>
+                <a asp-page="/Products/Index" class="btn btn-soft">Back</a>
+                <a asp-page="/Products/Delete" asp-route-id="@Model.CurrentProduct.ProductID" class="btn btn-outline-danger">Delete</a>
+            </div>
+        </form>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

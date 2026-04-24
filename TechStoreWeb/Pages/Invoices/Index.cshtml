@@ -1,0 +1,55 @@
+@page
+@model TechStoreWeb.Pages.Invoices.IndexModel
+@{
+    ViewData["Title"] = "Invoices";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-head">
+    <div>
+        <h2 class="mb-0">Branch Invoices</h2>
+        <small class="text-muted">Read directly from MySQL through SQL Server Linked Server OPENQUERY.</small>
+    </div>
+    <a class="btn btn-soft" asp-page="/Distributed/Evidence">See Distributed Proof</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">Could not load data: @Model.ErrorMessage</div>
+}
+else if (Model.Invoices.Count == 0)
+{
+    <div class="alert alert-warning">No invoices found.</div>
+}
+else
+{
+    <div class="metric-card mb-3">
+        <div class="metric-label">Total Invoice Revenue (Branch)</div>
+        <div class="metric-value">@Model.TotalRevenue.ToString("N0")</div>
+    </div>
+
+    <div class="table-responsive glass-card p-2">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>InvoiceID</th>
+                    <th>ProductID</th>
+                    <th>Quantity</th>
+                    <th>SaleDate</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Invoices)
+            {
+                <tr>
+                    <td>@item.InvoiceID</td>
+                    <td>@item.ProductID</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.SaleDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td class="text-end">@item.Total.ToString("N0")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

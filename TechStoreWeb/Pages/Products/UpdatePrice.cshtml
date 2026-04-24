@@ -1,0 +1,102 @@
+@page "{id:int?}"
+@model TechStoreWeb.Pages.Products.UpdatePriceModel
+@{
+    ViewData["Title"] = "Update Price";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-head">
+    <div>
+        <h2 class="mb-0">Price Synchronization Console</h2>
+        <small class="text-muted">Update HQ price and process queue to sync Branch MySQL.</small>
+    </div>
+    <a class="btn btn-soft" asp-page="/Products/Index">Back to Products</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (Model.Product is null)
+{
+    <div class="alert alert-warning">Khong co san pham de thao tac.</div>
+}
+else
+{
+    <div class="glass-card p-4 mb-3">
+        <div class="card-body p-0">
+            <h5 class="card-title">@Model.Product.ProductName</h5>
+            <p class="card-text mb-1"><strong>ProductID:</strong> @Model.Product.ProductID</p>
+            <p class="card-text mb-1"><strong>Category:</strong> @Model.Product.Category</p>
+            <p class="card-text"><strong>Current HQ Price:</strong> @Model.Product.Price.ToString("N0")</p>
+
+            <form method="post" class="row g-3">
+                <input asp-for="Id" type="hidden" />
+                <div class="col-md-4">
+                    <label asp-for="NewPrice" class="form-label">New Price</label>
+                    <input asp-for="NewPrice" class="form-control" type="number" min="1" step="1000" />
+                    <span asp-validation-for="NewPrice" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-brand" type="submit">Update and Sync</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (Model.SyncResult is not null)
+{
+    <div class="alert @(Model.SyncResult.Success ? "alert-success" : "alert-warning")">
+        <strong>@Model.SyncResult.Message</strong>
+        @if (Model.SyncResult.BranchPriceAfterSync.HasValue)
+        {
+            <div>Branch Price After Sync: @Model.SyncResult.BranchPriceAfterSync.Value.ToString("N0")</div>
+        }
+        @if (Model.SyncResult.LatestQueueItem is not null)
+        {
+            <div>Queue Status: @Model.SyncResult.LatestQueueItem.Status | QueueID: @Model.SyncResult.LatestQueueItem.QueueID</div>
+            @if (!string.IsNullOrWhiteSpace(Model.SyncResult.LatestQueueItem.LastError))
+            {
+                <div class="text-danger">LastError: @Model.SyncResult.LatestQueueItem.LastError</div>
+            }
+        }
+    </div>
+}
+
+<h4 class="mt-4">Recent Queue Events</h4>
+<div class="table-responsive glass-card p-2">
+    <table class="table table-sm table-striped align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>QueueID</th>
+                <th>ProductID</th>
+                <th>NewPrice</th>
+                <th>Status</th>
+                <th>CreatedAt</th>
+                <th>ProcessedAt</th>
+                <th>LastError</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.RecentQueue)
+        {
+            <tr>
+                <td>@item.QueueID</td>
+                <td>@item.ProductID</td>
+                <td>@item.NewPrice.ToString("N0")</td>
+                <td>
+                    <span class="badge @(item.Status == "S" ? "text-bg-success" : item.Status == "E" ? "text-bg-danger" : "text-bg-warning")">@item.Status</span>
+                </td>
+                <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@(item.ProcessedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</td>
+                <td>@(item.LastError ?? "-")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

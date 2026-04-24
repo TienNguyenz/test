@@ -1,0 +1,66 @@
+@page
+@model TechStoreWeb.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 page-head">
+    <div>
+        <h2 class="mb-1">HQ Product Master</h2>
+        <small class="text-muted">Source of truth: SQL Server table TechStore_HQ.dbo.SanPham</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-brand" asp-page="/Products/Create">Add Product</a>
+        <a class="btn btn-soft" asp-page="/Products/UpdatePrice">Price Sync</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">Could not load products: @Model.ErrorMessage</div>
+}
+else if (Model.Products.Count == 0)
+{
+    <div class="alert alert-warning">No products found.</div>
+}
+else
+{
+    <div class="glass-card p-3">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ProductID</th>
+                    <th>ProductName</th>
+                    <th>Category</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Products)
+            {
+                <tr>
+                    <td>@item.ProductID</td>
+                    <td>@item.ProductName</td>
+                    <td><span class="pill">@item.Category</span></td>
+                    <td class="text-end">@item.Price.ToString("N0")</td>
+                    <td class="text-center">
+                        <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
+                            <a class="btn btn-sm btn-outline-primary" asp-page="/Products/Edit" asp-route-id="@item.ProductID">Edit</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="/Products/UpdatePrice" asp-route-id="@item.ProductID">Sync Price</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-page="/Products/Delete" asp-route-id="@item.ProductID">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    </div>
+}

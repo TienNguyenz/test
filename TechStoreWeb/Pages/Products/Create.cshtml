@@ -1,0 +1,43 @@
+@page
+@model TechStoreWeb.Pages.Products.CreateModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="page-head mb-4">
+    <h2>Create Product</h2>
+    <p>Add a new product at HQ and mirror it to Branch if available.</p>
+</div>
+
+<div class="glass-card p-4">
+    <form method="post" class="row g-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="col-md-8">
+            <label asp-for="Input.ProductName" class="form-label"></label>
+            <input asp-for="Input.ProductName" class="form-control" />
+            <span asp-validation-for="Input.ProductName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="Input.Price" class="form-label"></label>
+            <input asp-for="Input.Price" type="number" min="1000" step="1000" class="form-control" />
+            <span asp-validation-for="Input.Price" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Input.Category" class="form-label"></label>
+            <input asp-for="Input.Category" class="form-control" />
+            <span asp-validation-for="Input.Category" class="text-danger"></span>
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-brand">Create Product</button>
+            <a asp-page="/Products/Index" class="btn btn-soft">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

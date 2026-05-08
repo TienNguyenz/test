@@ -1,74 +1,113 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TechStoreWeb</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - TechStore DDB</title>
+    <meta name="description" content="TechStore Distributed Database Admin — SQL Server & MySQL Integration Dashboard" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TechStoreWeb.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg app-navbar mb-3">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-area="" asp-page="/Index">TechStore Control</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Invoices/Index">Invoices</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Reports/Revenue">Revenue</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Products/UpdatePrice">Update Price</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Distributed/Evidence">Distributed Evidence</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Distributed/DataContracts">Data Contracts</a>
-                        </li>
-                    </ul>
-                    <div class="d-flex gap-2 mt-2 mt-lg-0">
-                        <span class="mini-pill">HQ SQL Server</span>
-                        <span class="mini-pill">Branch MySQL</span>
-                    </div>
+    <div class="app-shell">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon">TS</div>
+                <div>
+                    <div class="sidebar-brand-text">TechStore</div>
+                    <div class="sidebar-brand-sub">DDB Admin</div>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container main-container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="footer text-muted">
-        <div class="container">
-            &copy; 2026 - TechStoreWeb Demo
+            <div class="sidebar-section-label">Main</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a asp-page="/Index" class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Products/Index" class="@(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Products") == true ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        Products
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Invoices/Index" class="@(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Invoices") == true ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Invoices
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Reports/Revenue" class="@(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Reports") == true ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        Revenue
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-label">Distributed</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a asp-page="/Products/UpdatePrice" class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Products/UpdatePrice" ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                        Price Sync
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Distributed/Evidence" class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Distributed/Evidence" ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                        Evidence
+                    </a>
+                </li>
+                <li>
+                    <a asp-page="/Distributed/DataContracts" class="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Distributed/DataContracts" ? "active" : "")">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                        Data Contracts
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-status">
+                <span class="status-dot">HQ · SQL Server</span>
+                <span class="status-dot">Branch · MySQL</span>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-area">
+            <!-- Mobile Topbar -->
+            <div class="topbar">
+                <button class="topbar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <span class="topbar-title">TechStore DDB</span>
+            </div>
+
+            <div class="main-content">
+                <main role="main">
+                    @RenderBody()
+                </main>
+            </div>
+
+            <footer class="footer">
+                &copy; 2026 — TechStore DDB Admin · Distributed Database Demo
+            </footer>
         </div>
-    </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -5,7 +5,10 @@
 }
 
 <div class="page-head mb-4">
-    <h2>Edit Product</h2>
+    <h2>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dim)" stroke-width="2" style="margin-right:8px;vertical-align:-4px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Product
+    </h2>
     <p>Update HQ fields and keep Branch metadata consistent.</p>
 </div>
 
@@ -16,7 +19,11 @@
 
 @if (Model.Result is not null)
 {
-    <div class="alert @(Model.Result.Success ? "alert-success" : "alert-warning")">
+    var alertClass = Model.Result.Success 
+        ? (string.IsNullOrWhiteSpace(Model.Result.BranchSyncError) ? "alert-success" : "alert-warning") 
+        : "alert-danger";
+        
+    <div class="alert @alertClass">
         @Model.Result.Message
         @if (!string.IsNullOrWhiteSpace(Model.Result.BranchSyncError))
         {
@@ -27,8 +34,13 @@
 
 @if (Model.CurrentProduct is not null)
 {
-    <div class="glass-card p-4">
-        <div class="mb-3 small text-muted">ProductID: @Model.CurrentProduct.ProductID</div>
+    <div class="glass-card p-4" style="max-width:700px">
+        <div class="mb-3 d-flex align-items-center gap-3">
+            <div style="width:44px;height:44px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#fff;font-family:'Space Grotesk',sans-serif">
+                @Model.CurrentProduct.ProductID
+            </div>
+            <span style="color:var(--on-surface-dim);font-size:0.85rem">ProductID: @Model.CurrentProduct.ProductID</span>
+        </div>
 
         <form method="post" class="row g-3">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -51,7 +63,7 @@
                 <span asp-validation-for="Input.Category" class="text-danger"></span>
             </div>
 
-            <div class="col-12 d-flex gap-2">
+            <div class="col-12 d-flex gap-2 mt-4">
                 <button type="submit" class="btn btn-brand">Save Changes</button>
                 <a asp-page="/Products/Index" class="btn btn-soft">Back</a>
                 <a asp-page="/Products/Delete" asp-route-id="@Model.CurrentProduct.ProductID" class="btn btn-outline-danger">Delete</a>

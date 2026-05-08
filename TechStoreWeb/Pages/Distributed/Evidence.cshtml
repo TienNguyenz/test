@@ -5,7 +5,10 @@
 }
 
 <div class="page-head mb-4">
-    <h2>Distributed Database Evidence</h2>
+    <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--tertiary)" stroke-width="2" style="margin-right:10px;vertical-align:-4px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Distributed Database Evidence
+    </h2>
     <p>Direct proof that this demo integrates SQL Server HQ and MySQL Branch without full migration.</p>
 </div>
 
@@ -15,25 +18,25 @@
 }
 
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-3 col-6">
         <div class="metric-card">
             <div class="metric-label">Linked Server</div>
-            <div class="metric-value @(Model.Snapshot.LinkedServerHealthy ? "ok" : "bad")">@(Model.Snapshot.LinkedServerHealthy ? "Healthy" : "Failed")</div>
+            <div class="metric-value @(Model.Snapshot.LinkedServerHealthy ? "ok" : "bad")">@(Model.Snapshot.LinkedServerHealthy ? "✓ Healthy" : "✗ Failed")</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-6">
         <div class="metric-card">
             <div class="metric-label">HQ Products</div>
             <div class="metric-value">@Model.Snapshot.HqProductCount</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-6">
         <div class="metric-card">
             <div class="metric-label">Branch Products</div>
             <div class="metric-value">@Model.Snapshot.BranchProductCount</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-6">
         <div class="metric-card">
             <div class="metric-label">Branch Invoices</div>
             <div class="metric-value">@Model.Snapshot.BranchInvoiceCount</div>
@@ -45,7 +48,7 @@
     <div class="col-md-4">
         <div class="metric-card">
             <div class="metric-label">Queue Pending</div>
-            <div class="metric-value">@Model.Snapshot.QueuePendingCount</div>
+            <div class="metric-value" style="color:var(--warn)">@Model.Snapshot.QueuePendingCount</div>
         </div>
     </div>
     <div class="col-md-4">
@@ -68,14 +71,74 @@
 }
 
 <div class="glass-card p-4 mb-4">
-    <h4 class="mb-3">Transparent JOIN Query (Requirement #2)</h4>
-    <pre class="sql-box mb-0">SELECT p.ProductID, p.ProductName, p.Price, h.Quantity, CAST(h.SaleDate AS DATETIME2(0)) AS SaleDate, h.Total
-FROM TechStore_HQ.dbo.SanPham p
-JOIN OPENQUERY(MYSQL,
-'    SELECT ProductID, Quantity, SaleDate, Total
-     FROM TechStore_Branch.HoaDon') h
-    ON p.ProductID = CAST(h.ProductID AS INT);</pre>
+    <h4 class="mb-3" style="color:var(--primary-dim)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Requirement #1 — Logical Transparency
+    </h4>
+    <p class="text-muted mb-3">
+        App/User chỉ gọi Stored Procedure logic — không cần viết OPENQUERY hay biết dữ liệu đang phân tán như thế nào.
+    </p>
+    <pre class="sql-box mb-0">EXEC dbo.sp_GetUnifiedSales
+    &#64;FromDate = NULL,
+    &#64;ToDate = NULL,
+    &#64;Take = 200;</pre>
 </div>
+
+<div class="glass-card p-4 mb-4">
+    <h4 class="mb-3" style="color:var(--secondary)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Requirement #2 — Physical and Geographic Distribution
+    </h4>
+    <p class="text-muted mb-3">
+        Bên trong SQL Server, truy vấn được phân ra theo tuyến xử lý phân tán như sau:
+    </p>
+    <pre class="sql-box mb-0">sp_GetUnifiedSales (HQ SQL Server)
+    -> vw_BranchInvoices_Logical
+        -> OPENQUERY(MYSQL, 'SELECT ... FROM TechStore_Branch.HoaDon')
+    -> JOIN dbo.SanPham (HQ SQL Server)
+    -> trả kết quả hợp nhất về cho user</pre>
+</div>
+
+<div class="glass-card p-4 mb-4">
+    <h4 class="mb-3" style="color:var(--tertiary)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tertiary)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 012 2v7a2 2 0 01-2 2H8a2 2 0 01-2-2v-3"/></svg>
+        Physical Topology (Demo)
+    </h4>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Node</th>
+                    <th>Role</th>
+                    <th>DBMS</th>
+                    <th>Data</th>
+                    <th>Site</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="env-badge" style="font-size:0.75rem">HQ Node</span></td>
+                    <td>Coordinator + Logical Layer</td>
+                    <td><span class="mini-pill">SQL Server</span></td>
+                    <td>SanPham, PriceSyncQueue, logical SP/View</td>
+                    <td>Trụ sở chính</td>
+                </tr>
+                <tr>
+                    <td><span class="env-badge" style="font-size:0.75rem;border-color:rgba(157,80,187,0.3);color:#edb1ff;background:rgba(157,80,187,0.08)">Branch Node</span></td>
+                    <td>Operational Sales Data</td>
+                    <td><span class="mini-pill" style="border-color:rgba(157,80,187,0.2);color:#edb1ff;background:rgba(157,80,187,0.06)">MySQL</span></td>
+                    <td>HoaDon, SanPham</td>
+                    <td>Chi nhánh</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h4 class="mb-3">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dim)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    Cross-site JOIN Result
+</h4>
 
 <form method="get" class="row g-3 mb-3">
     <div class="col-md-3">
@@ -91,7 +154,7 @@ JOIN OPENQUERY(MYSQL,
     </div>
 </form>
 
-<div class="table-responsive">
+<div class="table-responsive glass-card p-3">
     <table class="table table-striped table-hover align-middle">
         <thead class="table-dark">
             <tr>
@@ -108,13 +171,13 @@ JOIN OPENQUERY(MYSQL,
         @foreach (var row in Model.JoinRows)
         {
             <tr>
-                <td>@row.ProductID</td>
+                <td style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--on-surface-dim)">#@row.ProductID</td>
                 <td>@row.ProductName</td>
-                <td class="text-end">@row.HQPrice.ToString("N0")</td>
-                <td class="text-end">@row.Quantity</td>
+                <td class="text-end" style="font-family:'Space Grotesk',sans-serif">@row.HQPrice.ToString("N0")</td>
+                <td class="text-end" style="font-family:'Space Grotesk',sans-serif;font-weight:600">@row.Quantity</td>
                 <td>@row.SaleDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                <td class="text-end">@row.BranchTotal.ToString("N0")</td>
-                <td class="text-end">@row.RevenueByHQPrice.ToString("N0")</td>
+                <td class="text-end" style="font-family:'Space Grotesk',sans-serif">@row.BranchTotal.ToString("N0")</td>
+                <td class="text-end" style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ok)">@row.RevenueByHQPrice.ToString("N0")</td>
             </tr>
         }
         </tbody>

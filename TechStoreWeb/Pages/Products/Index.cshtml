@@ -4,14 +4,20 @@
     ViewData["Title"] = "Products";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 page-head">
+<div class="d-flex justify-content-between align-items-center mb-4 page-head flex-wrap gap-2">
     <div>
-        <h2 class="mb-1">HQ Product Master</h2>
-        <small class="text-muted">Source of truth: SQL Server table TechStore_HQ.dbo.SanPham</small>
+        <h2 class="mb-1">Product Catalog</h2>
+        <small>Quản lý danh mục sản phẩm thống nhất của hệ thống phân tán.</small>
     </div>
     <div class="d-flex gap-2">
-        <a class="btn btn-brand" asp-page="/Products/Create">Add Product</a>
-        <a class="btn btn-soft" asp-page="/Products/UpdatePrice">Price Sync</a>
+        <a class="btn btn-brand" asp-page="/Products/Create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Product
+        </a>
+        <a class="btn btn-soft" asp-page="/Products/UpdatePrice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Price Sync
+        </a>
     </div>
 </div>
 
@@ -46,14 +52,14 @@ else
             @foreach (var item in Model.Products)
             {
                 <tr>
-                    <td>@item.ProductID</td>
+                    <td><span style="color:var(--on-surface-dim);font-family:'Space Grotesk',sans-serif;font-weight:500">#@item.ProductID</span></td>
                     <td>@item.ProductName</td>
                     <td><span class="pill">@item.Category</span></td>
-                    <td class="text-end">@item.Price.ToString("N0")</td>
+                    <td class="text-end" style="font-family:'Space Grotesk',sans-serif;font-weight:600">@item.Price.ToString("N0")</td>
                     <td class="text-center">
                         <div class="d-inline-flex gap-1 flex-wrap justify-content-center">
                             <a class="btn btn-sm btn-outline-primary" asp-page="/Products/Edit" asp-route-id="@item.ProductID">Edit</a>
-                            <a class="btn btn-sm btn-outline-secondary" asp-page="/Products/UpdatePrice" asp-route-id="@item.ProductID">Sync Price</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-page="/Products/UpdatePrice" asp-route-id="@item.ProductID">Sync</a>
                             <a class="btn btn-sm btn-outline-danger" asp-page="/Products/Delete" asp-route-id="@item.ProductID">Delete</a>
                         </div>
                     </td>

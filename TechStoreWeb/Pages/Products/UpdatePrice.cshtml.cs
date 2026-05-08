@@ -97,4 +97,20 @@ public class UpdatePriceModel : PageModel
             return Page();
         }
     }
+    public async Task<IActionResult> OnPostProcessQueueAsync()
+    {
+        try
+        {
+            await _repository.ProcessQueueAsync();
+            TempData["SuccessMessage"] = "Đã kích hoạt quét lại toàn bộ Hàng Đợi (Queue).";
+            return RedirectToPage(new { id = Id });
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Lỗi khi quét Queue: " + ex.Message;
+            if (Id > 0) Product = await _repository.GetProductByIdAsync(Id);
+            RecentQueue = await _repository.GetLatestQueueAsync();
+            return Page();
+        }
+    }
 }

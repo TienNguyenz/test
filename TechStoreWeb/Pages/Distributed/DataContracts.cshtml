@@ -4,35 +4,115 @@
 }
 
 <div class="page-head mb-4">
-    <h2>Data Contract and Constraint Mapping</h2>
+    <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dim)" stroke-width="2" style="margin-right:10px;vertical-align:-4px"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Data Contract &amp; Constraint Mapping
+    </h2>
     <p>Field constraints and type normalization applied between SQL Server and MySQL.</p>
 </div>
 
-<div class="glass-card p-4 mb-3">
-    <h4>SQL Server (HQ) - SanPham</h4>
-    <ul class="mb-0">
-        <li>ProductID: INT IDENTITY PRIMARY KEY</li>
-        <li>ProductName: NVARCHAR(200) NOT NULL</li>
-        <li>Price: DECIMAL(18,2) CHECK (Price &gt;= 0)</li>
-        <li>Category: NVARCHAR(100) NOT NULL</li>
-    </ul>
+<div class="row g-3 mb-3">
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h4 class="mb-3">
+                <span class="mini-pill" style="margin-right:8px">SQL Server</span>
+                HQ — SanPham
+            </h4>
+            <table class="table table-sm align-middle mb-0">
+                <thead class="table-dark">
+                    <tr><th>Field</th><th>Type</th><th>Constraint</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>ProductID</td><td><code style="color:var(--tertiary)">INT IDENTITY</code></td><td>PRIMARY KEY</td></tr>
+                    <tr><td>ProductName</td><td><code style="color:var(--tertiary)">NVARCHAR(200)</code></td><td>NOT NULL</td></tr>
+                    <tr><td>Price</td><td><code style="color:var(--tertiary)">DECIMAL(18,2)</code></td><td>CHECK ≥ 0</td></tr>
+                    <tr><td>Category</td><td><code style="color:var(--tertiary)">NVARCHAR(100)</code></td><td>NOT NULL</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h4 class="mb-3">
+                <span class="mini-pill" style="margin-right:8px;border-color:rgba(157,80,187,0.2);color:#edb1ff;background:rgba(157,80,187,0.06)">MySQL</span>
+                Branch — SanPham / HoaDon
+            </h4>
+            <table class="table table-sm align-middle mb-0">
+                <thead class="table-dark">
+                    <tr><th>Field</th><th>Type</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>SanPham.Price</td><td><code style="color:var(--tertiary)">DECIMAL(18,2)</code></td><td>NOT NULL</td></tr>
+                    <tr><td>HoaDon.SaleDate</td><td><code style="color:var(--tertiary)">DATETIME</code></td><td>→ CAST DATETIME2</td></tr>
+                    <tr><td>HoaDon.Total</td><td><code style="color:var(--tertiary)">DECIMAL(18,2)</code></td><td>Aggregated in HQ</td></tr>
+                    <tr><td>HoaDon.Quantity</td><td><code style="color:var(--tertiary)">INT</code></td><td>CHECK > 0</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="glass-card p-4 mb-3">
-    <h4>MySQL (Branch) - SanPham/HoaDon</h4>
-    <ul class="mb-0">
-        <li>SanPham.Price: DECIMAL(18,2) NOT NULL</li>
-        <li>HoaDon.SaleDate: DATETIME (cast to DATETIME2 in SQL Server queries)</li>
-        <li>HoaDon.Total: DECIMAL(18,2) (cast and aggregated in HQ report)</li>
-        <li>HoaDon.Quantity: INT CHECK (Quantity &gt; 0)</li>
-    </ul>
+    <h4 class="mb-3" style="color:var(--primary-dim)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Logical Interface Layer (User Transparency)
+    </h4>
+    <div class="row g-2">
+        <div class="col-md-6">
+            <div class="metric-card">
+                <div class="metric-label">View</div>
+                <div style="color:var(--on-surface);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.9rem">vw_BranchInvoices_Logical</div>
+                <div style="color:var(--on-surface-dim);font-size:0.8rem">Expose invoice schema in SQL Server types</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="metric-card">
+                <div class="metric-label">SP</div>
+                <div style="color:var(--on-surface);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.9rem">sp_GetUnifiedInvoices</div>
+                <div style="color:var(--on-surface-dim);font-size:0.8rem">User-facing invoice query endpoint</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="metric-card">
+                <div class="metric-label">SP</div>
+                <div style="color:var(--on-surface);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.9rem">sp_GetUnifiedSales</div>
+                <div style="color:var(--on-surface-dim);font-size:0.8rem">User-facing joined sales endpoint</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="metric-card">
+                <div class="metric-label">SP</div>
+                <div style="color:var(--on-surface);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.9rem">sp_BaoCaoDoanhThu</div>
+                <div style="color:var(--on-surface-dim);font-size:0.8rem">Reporting endpoint used by Web UI</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="glass-card p-4">
-    <h4>Normalization Rules in Query Layer</h4>
-    <ul class="mb-0">
-        <li>CAST(SaleDate AS DATETIME2(0)) to align SQL Server and MySQL datetime behavior.</li>
-        <li>CAST(Total AS DECIMAL(18,2)) to prevent precision mismatch.</li>
-        <li>CAST(ProductID, Quantity AS INT) before joins and aggregations.</li>
-    </ul>
+    <h4 class="mb-3" style="color:var(--warn)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Normalization Rules in Query Layer
+    </h4>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead class="table-dark">
+                <tr><th>Rule</th><th>Purpose</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code style="color:var(--tertiary)">CAST(SaleDate AS DATETIME2(0))</code></td>
+                    <td>Align SQL Server and MySQL datetime behavior</td>
+                </tr>
+                <tr>
+                    <td><code style="color:var(--tertiary)">CAST(Total AS DECIMAL(18,2))</code></td>
+                    <td>Prevent precision mismatch</td>
+                </tr>
+                <tr>
+                    <td><code style="color:var(--tertiary)">CAST(ProductID, Quantity AS INT)</code></td>
+                    <td>Before JOINs and aggregations</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

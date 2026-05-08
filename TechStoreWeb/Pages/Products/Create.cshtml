@@ -5,34 +5,40 @@
 }
 
 <div class="page-head mb-4">
-    <h2>Create Product</h2>
+    <h2>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="2" style="margin-right:8px;vertical-align:-4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Product
+    </h2>
     <p>Add a new product at HQ and mirror it to Branch if available.</p>
 </div>
 
-<div class="glass-card p-4">
+<div class="glass-card p-4" style="max-width:700px">
     <form method="post" class="row g-3">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <div class="col-md-8">
             <label asp-for="Input.ProductName" class="form-label"></label>
-            <input asp-for="Input.ProductName" class="form-control" />
+            <input asp-for="Input.ProductName" class="form-control" placeholder="e.g. iPhone 15 Pro Max" />
             <span asp-validation-for="Input.ProductName" class="text-danger"></span>
         </div>
 
         <div class="col-md-4">
             <label asp-for="Input.Price" class="form-label"></label>
-            <input asp-for="Input.Price" type="number" min="1000" step="1000" class="form-control" />
+            <input asp-for="Input.Price" type="number" min="1000" step="1000" class="form-control" placeholder="e.g. 29990000" />
             <span asp-validation-for="Input.Price" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
             <label asp-for="Input.Category" class="form-label"></label>
-            <input asp-for="Input.Category" class="form-control" />
+            <input asp-for="Input.Category" class="form-control" placeholder="e.g. Smartphone" />
             <span asp-validation-for="Input.Category" class="text-danger"></span>
         </div>
 
-        <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-brand">Create Product</button>
+        <div class="col-12 d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-brand">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Product
+            </button>
             <a asp-page="/Products/Index" class="btn btn-soft">Cancel</a>
         </div>
     </form>

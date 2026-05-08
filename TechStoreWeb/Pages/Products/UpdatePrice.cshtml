@@ -4,10 +4,13 @@
     ViewData["Title"] = "Update Price";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 page-head">
+<div class="d-flex justify-content-between align-items-center mb-4 page-head flex-wrap gap-2">
     <div>
-        <h2 class="mb-0">Price Synchronization Console</h2>
-        <small class="text-muted">Update HQ price and process queue to sync Branch MySQL.</small>
+        <h2 class="mb-1">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2" style="margin-right:8px;vertical-align:-4px"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Price Synchronization Console
+        </h2>
+        <small>Update HQ price → Trigger Queue → Process → Sync to Branch MySQL.</small>
     </div>
     <a class="btn btn-soft" asp-page="/Products/Index">Back to Products</a>
 </div>
@@ -17,45 +20,69 @@
     <div class="alert alert-danger">@Model.ErrorMessage</div>
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
 @if (Model.Product is null)
 {
-    <div class="alert alert-warning">Khong co san pham de thao tac.</div>
+    <div class="alert alert-warning">Không có sản phẩm để thao tác.</div>
 }
 else
 {
-    <div class="glass-card p-4 mb-3">
-        <div class="card-body p-0">
-            <h5 class="card-title">@Model.Product.ProductName</h5>
-            <p class="card-text mb-1"><strong>ProductID:</strong> @Model.Product.ProductID</p>
-            <p class="card-text mb-1"><strong>Category:</strong> @Model.Product.Category</p>
-            <p class="card-text"><strong>Current HQ Price:</strong> @Model.Product.Price.ToString("N0")</p>
-
-            <form method="post" class="row g-3">
-                <input asp-for="Id" type="hidden" />
-                <div class="col-md-4">
-                    <label asp-for="NewPrice" class="form-label">New Price</label>
-                    <input asp-for="NewPrice" class="form-control" type="number" min="1" step="1000" />
-                    <span asp-validation-for="NewPrice" class="text-danger"></span>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-brand" type="submit">Update and Sync</button>
-                </div>
-            </form>
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div style="width:48px;height:48px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:#fff;font-family:'Space Grotesk',sans-serif;flex-shrink:0">
+                @Model.Product.ProductID
+            </div>
+            <div>
+                <h5 class="mb-0">@Model.Product.ProductName</h5>
+                <span class="pill mt-1">@Model.Product.Category</span>
+            </div>
         </div>
+
+        <div class="row g-3 align-items-end mb-3">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">Current HQ Price</div>
+                    <div class="metric-value">@Model.Product.Price.ToString("N0")</div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="row g-3">
+            <input asp-for="Id" type="hidden" />
+            <div class="col-md-4">
+                <label asp-for="NewPrice" class="form-label">New Price</label>
+                <input asp-for="NewPrice" class="form-control" type="number" min="1" step="1000" />
+                <span asp-validation-for="NewPrice" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-brand" type="submit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/></svg>
+                    Update &amp; Sync
+                </button>
+            </div>
+        </form>
     </div>
 }
 
 @if (Model.SyncResult is not null)
 {
-    <div class="alert @(Model.SyncResult.Success ? "alert-success" : "alert-warning")">
+    <div class="alert @(Model.SyncResult.Success ? "alert-success" : "alert-warning") mb-4">
         <strong>@Model.SyncResult.Message</strong>
         @if (Model.SyncResult.BranchPriceAfterSync.HasValue)
         {
-            <div>Branch Price After Sync: @Model.SyncResult.BranchPriceAfterSync.Value.ToString("N0")</div>
+            <div>Branch Price After Sync: <strong>@Model.SyncResult.BranchPriceAfterSync.Value.ToString("N0")</strong></div>
         }
         @if (Model.SyncResult.LatestQueueItem is not null)
         {
-            <div>Queue Status: @Model.SyncResult.LatestQueueItem.Status | QueueID: @Model.SyncResult.LatestQueueItem.QueueID</div>
+            <div>
+                Queue Status:
+                <span class="badge @(Model.SyncResult.LatestQueueItem.Status == "S" ? "text-bg-success" : Model.SyncResult.LatestQueueItem.Status == "E" ? "text-bg-danger" : "text-bg-warning")">@Model.SyncResult.LatestQueueItem.Status</span>
+                | QueueID: @Model.SyncResult.LatestQueueItem.QueueID
+            </div>
             @if (!string.IsNullOrWhiteSpace(Model.SyncResult.LatestQueueItem.LastError))
             {
                 <div class="text-danger">LastError: @Model.SyncResult.LatestQueueItem.LastError</div>
@@ -64,10 +91,22 @@ else
     </div>
 }
 
-<h4 class="mt-4">Recent Queue Events</h4>
-<div class="table-responsive glass-card p-2">
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h4 class="mb-0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-dim)" stroke-width="2" style="margin-right:8px;vertical-align:-3px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Recent Queue Events
+    </h4>
+    <form method="post" asp-page-handler="ProcessQueue">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-sm btn-outline-warning">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-2px"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            Retry Failed Syncs
+        </button>
+    </form>
+</div>
+<div class="table-responsive glass-card p-3">
     <table class="table table-sm table-striped align-middle">
-        <thead class="table-light">
+        <thead class="table-dark">
             <tr>
                 <th>QueueID</th>
                 <th>ProductID</th>
@@ -82,15 +121,15 @@ else
         @foreach (var item in Model.RecentQueue)
         {
             <tr>
-                <td>@item.QueueID</td>
+                <td style="font-family:'Space Grotesk',sans-serif;font-weight:500">#@item.QueueID</td>
                 <td>@item.ProductID</td>
-                <td>@item.NewPrice.ToString("N0")</td>
+                <td style="font-family:'Space Grotesk',sans-serif">@item.NewPrice.ToString("N0")</td>
                 <td>
                     <span class="badge @(item.Status == "S" ? "text-bg-success" : item.Status == "E" ? "text-bg-danger" : "text-bg-warning")">@item.Status</span>
                 </td>
                 <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                <td>@(item.ProcessedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "-")</td>
-                <td>@(item.LastError ?? "-")</td>
+                <td>@(item.ProcessedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "—")</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">@(item.LastError ?? "—")</td>
             </tr>
         }
         </tbody>

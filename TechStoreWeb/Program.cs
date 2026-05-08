@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<TechStoreRepository>();
+builder.Services.AddHostedService<PriceSyncBackgroundService>();
 
 var app = builder.Build();
 

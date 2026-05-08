@@ -123,17 +123,19 @@ SET ProductName = @ProductName,
     Category = @Category
 WHERE ProductID = @ProductID;";
 
-        const string updateBranchMetaSql = @"
-UPDATE OPENQUERY(MYSQL,
-'SELECT ProductID, ProductName, Category FROM TechStore_Branch.SanPham')
-SET ProductName = @ProductName,
-    Category = @Category
-WHERE ProductID = @ProductID;";
+        // EXEC AT MYSQL does NOT support C# SqlCommand parameters — values must be interpolated directly.
+        // Single quotes inside values are escaped by doubling them ('') for MySQL string safety.
+        var safeName     = input.ProductName.Trim().Replace("'", "''");
+        var safeCategory = input.Category.Trim().Replace("'", "''");
 
-        const string insertBranchSql = @"
-INSERT OPENQUERY(MYSQL,
-'SELECT ProductID, ProductName, Price, Category FROM TechStore_Branch.SanPham')
-VALUES (@ProductID, @ProductName, @Price, @Category);";
+        var updateBranchMetaSql =
+            "EXEC('UPDATE TechStore_Branch.SanPham " +
+            "SET ProductName = ''" + safeName + "'', Category = ''" + safeCategory + "'' " +
+            "WHERE ProductID = " + productId + "') AT MYSQL;";
+
+        var insertBranchSql =
+            "EXEC('INSERT INTO TechStore_Branch.SanPham (ProductID, ProductName, Price, Category) " +
+            "VALUES (" + productId + ", ''" + safeName + "'', " + input.Price + ", ''" + safeCategory + "'')') AT MYSQL;";
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync();
@@ -179,19 +181,12 @@ VALUES (@ProductID, @ProductName, @Price, @Category);";
 
         try
         {
+            // Dynamic SQL: no parameters needed — values are already embedded in the string
             await using var updateBranchMetaCommand = new SqlCommand(updateBranchMetaSql, connection);
-            updateBranchMetaCommand.Parameters.AddWithValue("@ProductName", input.ProductName.Trim());
-            updateBranchMetaCommand.Parameters.AddWithValue("@Category", input.Category.Trim());
-            updateBranchMetaCommand.Parameters.AddWithValue("@ProductID", productId);
-
             var affected = await updateBranchMetaCommand.ExecuteNonQueryAsync();
             if (affected == 0)
             {
                 await using var insertBranchCommand = new SqlCommand(insertBranchSql, connection);
-                insertBranchCommand.Parameters.AddWithValue("@ProductID", productId);
-                insertBranchCommand.Parameters.AddWithValue("@ProductName", input.ProductName.Trim());
-                insertBranchCommand.Parameters.AddWithValue("@Price", input.Price);
-                insertBranchCommand.Parameters.AddWithValue("@Category", input.Category.Trim());
                 await insertBranchCommand.ExecuteNonQueryAsync();
             }
         }
@@ -576,7 +571,7 @@ WHERE ProductID = @ProductID;";
                 return new UpdatePriceResult
                 {
                     Success = false,
-                    Message = "Khong tim thay san pham de cap nhat."
+                    Message = "Product not found."
                 };
             }
         }
@@ -629,8 +624,8 @@ WHERE ProductID = @ProductID;";
         {
             Success = success,
             Message = success
-                ? "Cap nhat gia thanh cong va da dong bo sang chi nhanh."
-                : "Da cap nhat gia tai HQ, nhung dong bo chi nhanh gap loi. Xem LastError trong queue.",
+                ? "Price updated and synced to Branch successfully."
+                : "Price updated at HQ, but Branch sync failed. Check LastError in queue.",
             LatestQueueItem = latestQueue,
             BranchPriceAfterSync = branchPrice
         };
@@ -646,5 +641,23 @@ WHERE ProductID = @ProductID;";
         }
 
         return Convert.ToInt32(scalar);
+    }
+
+    public async Task ProcessQueueAsync()
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        // Step 1: Reset all failed (E) items back to Pending (P) so the SP can retry them
+        await using (var resetCmd = new SqlCommand(
+            "UPDATE dbo.PriceSyncQueue SET Status = 'P', LastError = NULL WHERE Status = 'E';",
+            connection))
+        {
+            await resetCmd.ExecuteNonQueryAsync();
+        }
+
+        // Step 2: Now the SP will find these P items and attempt to sync them
+        await using var processCmd = new SqlCommand("EXEC dbo.sp_ProcessPriceSyncQueue;", connection);
+        await processCmd.ExecuteNonQueryAsync();
     }
 }
